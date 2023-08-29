@@ -7,7 +7,7 @@ pipeline {
         stage('Build') {
             agent {
                 docker {
-                    image 'python:2-alpine'
+                    image 'python:3.11.5-alpine3.18'
                 }
             }
             steps {
@@ -36,15 +36,24 @@ pipeline {
                 input message: 'Lanjutkan ke tahap Deploy?', ok: 'Proceed'
             }
         }
-        stage('Deploy') {
+        stage('Deploy') { 
             agent any
+            environment { 
+                VOLUME = '$(pwd)/sources:/src'
+                IMAGE = 'cdrx/pyinstaller-linux:python2'
+            }
             steps {
-                script {
-                    sh 'docker build -t my-python-app .'
-                    sh 'docker run -d --name=my-python-app my-python-app'
-                    sh 'sleep 60'
-                    sh 'docker stop my-python-app'
-                    sh 'docker rm my-python-app'
+                dir(path: env.BUILD_ID) { 
+                    unstash(name: 'compiled-results') 
+                    sh "docker run --rm -v ${VOLUME} ${IMAGE} 'pyinstaller -F add2vals.py'" 
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts "${env.BUILD_ID}/sources/dist/add2vals" 
+                    sh "CONTAINER_ID=$(docker run -d -v ${VOLUME} ${IMAGE} sleep 60)"
+                    sh "docker stop ${CONTAINER_ID}"
+                    sh "docker rm ${CONTAINER_ID}"
                 }
             }
         }
