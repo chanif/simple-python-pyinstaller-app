@@ -34,7 +34,7 @@ pipeline {
             input {
                 message "Lanjutkan ke tahap Deploy?"
                 ok "Proceed"
-                submitter "user1,user2" // Ganti dengan daftar pengguna yang diizinkan untuk memberikan persetujuan
+                submitter "chanif,dicoding"
                 parameters {
                     booleanParam(name: 'APPROVE_DEPLOY', defaultValue: false, description: 'Apakah Anda ingin melanjutkan ke tahap Deploy?')
                 }
