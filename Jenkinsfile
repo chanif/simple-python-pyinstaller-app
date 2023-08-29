@@ -30,6 +30,25 @@ pipeline {
                 }
             }
         }
+        stage('Manual Approval') {
+            input {
+                message "Lanjutkan ke tahap Deploy?"
+                ok "Proceed"
+                submitter "user1,user2" // Ganti dengan daftar pengguna yang diizinkan untuk memberikan persetujuan
+                parameters {
+                    booleanParam(name: 'APPROVE_DEPLOY', defaultValue: false, description: 'Apakah Anda ingin melanjutkan ke tahap Deploy?')
+                }
+            }
+            steps {
+                script {
+                    if (params.APPROVE_DEPLOY == true) {
+                        echo "Pengguna telah menyetujui untuk melanjutkan ke tahap Deploy."
+                    } else {
+                        error "Pengguna telah memilih untuk menghentikan eksekusi pipeline."
+                    }
+                }
+            }
+        }
         stage('Deploy') { 
             agent any
             environment { 
