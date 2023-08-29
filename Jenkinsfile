@@ -31,22 +31,20 @@ pipeline {
             }
         }
         stage('Manual Approval') {
+            input {
+                message "Lanjutkan ke tahap Deploy?"
+                ok "Proceed"
+                parameters {
+                    booleanParam(name: 'APPROVE_DEPLOY', defaultValue: false, description: 'Apakah Anda ingin melanjutkan ke tahap Deploy?')
+                }
+            }
             steps {
                 script {
-                    def userInput = input(
-                        id: 'userInput',
-                        message: 'Lanjutkan ke tahap Deploy?',
-                        parameters: [
-                            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Apakah Anda ingin melanjutkan ke tahap Deploy?']
-                        ]
-                    )
-
-                    if (userInput) {
+                    echo params.APPROVE_DEPLOY
+                    if (params.APPROVE_DEPLOY == true) {
                         echo "Pengguna telah menyetujui untuk melanjutkan ke tahap Deploy."
-                        currentBuild.description = "Manual approval granted"
                     } else {
                         error "Pengguna telah memilih untuk menghentikan eksekusi pipeline."
-                        currentBuild.description = "Manual approval denied"
                     }
                 }
             }
