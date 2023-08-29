@@ -36,7 +36,9 @@ pipeline {
                     def userInput = input(
                         id: 'userInput',
                         message: 'Lanjutkan ke tahap Deploy?',
-                        parameters: [booleanParam(defaultValue: false, description: 'Apakah Anda ingin melanjutkan ke tahap Deploy?')]
+                        parameters: [
+                            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Apakah Anda ingin melanjutkan ke tahap Deploy?']
+                        ]
                     )
 
                     if (userInput) {
