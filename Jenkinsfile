@@ -43,16 +43,23 @@ pipeline {
                 IMAGE = 'cdrx/pyinstaller-linux:python2'
             }
             steps {
-                dir(path: env.BUILD_ID) { 
-                    unstash(name: 'compiled-results') 
-                    sh "docker run --rm -v ${VOLUME} ${IMAGE} 'pyinstaller -F add2vals.py'" 
-                }
-            }
-            post {
-                success {
-                    archiveArtifacts "${env.BUILD_ID}/sources/dist/add2vals" 
-                    sh "CONTAINER_ID=$(docker run -d -v ${VOLUME} ${IMAGE} sleep 60)"
+                script {
+                    // Menjalankan kontainer dalam mode latar belakang
+                    def CONTAINER_ID = sh(script: "docker run -d -v ${VOLUME} ${IMAGE} sleep 60", returnStdout: true).trim()
+                    
+                    // Menampilkan status kontainer yang berjalan
+                    sh "docker ps"
+                    
+                    // Menunggu selama 1 menit
+                    sleep(time: 60, unit: 'SECONDS')
+                    
+                    // Menghentikan kontainer setelah 1 menit
                     sh "docker stop ${CONTAINER_ID}"
+                    
+                    // Menampilkan status kontainer setelah dihentikan
+                    sh "docker ps -a"
+                    
+                    // Menghapus kontainer (opsional)
                     sh "docker rm ${CONTAINER_ID}"
                 }
             }
